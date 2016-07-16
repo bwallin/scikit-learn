@@ -238,7 +238,8 @@ class LinearSVC(BaseEstimator, LinearClassifierMixin,
         check_classification_targets(y)
         self.classes_ = np.unique(y)
 
-        if self.dual == 'auto':
+        dual = self.dual
+        if dual == 'auto':
             if penalty == 'l2' and loss == 'hinge':
                 dual = True
             elif penalty == 'l1' and loss == 'squared_hinge':
