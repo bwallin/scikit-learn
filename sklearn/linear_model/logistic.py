@@ -451,7 +451,7 @@ def _check_solver_option(solver, multi_class, penalty, dual):
 def logistic_regression_path(X, y, pos_class=None, Cs=10, fit_intercept=True,
                              max_iter=100, tol=1e-4, verbose=0,
                              solver='lbfgs', coef=None,
-                             class_weight=None, dual=False, penalty='l2',
+                             class_weight=None, dual=None, penalty='l2',
                              intercept_scaling=1., multi_class='ovr',
                              random_state=None, check_input=True,
                              max_squared_sum=None, sample_weight=None):
@@ -1163,10 +1163,16 @@ class LogisticRegression(BaseEstimator, LinearClassifierMixin,
         http://www.csie.ntu.edu.tw/~cjlin/papers/maxent_dual.pdf
     """
 
-    def __init__(self, penalty='l2', dual=False, tol=1e-4, C=1.0,
+    def __init__(self, penalty='l2', dual=None, tol=1e-4, C=1.0,
                  fit_intercept=True, intercept_scaling=1, class_weight=None,
                  random_state=None, solver='liblinear', max_iter=100,
                  multi_class='ovr', verbose=0, warm_start=False, n_jobs=1):
+
+        # FIXME Set default dual='auto' and remove this for 0.20
+        if dual is None:
+            dual = False
+            warnings.warn("The default dual=False is deprecated and will be removed in 0.20",
+                          DeprecationWarning)
 
         self.penalty = penalty
         self.dual = dual
@@ -1227,8 +1233,16 @@ class LogisticRegression(BaseEstimator, LinearClassifierMixin,
         self.classes_ = np.unique(y)
         n_samples, n_features = X.shape
 
+        dual = self.dual
+        if dual == 'auto':
+            if self.solver != 'liblinear':
+                dual = False
+            else:
+                n_samples, n_features = X.shape
+                dual = (n_samples <= n_features)
+
         _check_solver_option(self.solver, self.multi_class, self.penalty,
-                             self.dual)
+                             dual)
 
         if self.solver == 'liblinear':
             if self.n_jobs != 1:
@@ -1237,7 +1251,7 @@ class LogisticRegression(BaseEstimator, LinearClassifierMixin,
                               " = {}.".format(self.n_jobs))
             self.coef_, self.intercept_, n_iter_ = _fit_liblinear(
                 X, y, self.C, self.fit_intercept, self.intercept_scaling,
-                self.class_weight, self.penalty, self.dual, self.verbose,
+                self.class_weight, self.penalty, dual, self.verbose,
                 self.max_iter, self.tol, self.random_state,
                 sample_weight=sample_weight)
             self.n_iter_ = np.array([n_iter_])

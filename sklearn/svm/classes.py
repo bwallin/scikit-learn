@@ -171,10 +171,17 @@ class LinearSVC(BaseEstimator, LinearClassifierMixin,
 
     """
 
-    def __init__(self, penalty='l2', loss='squared_hinge', dual=True, tol=1e-4,
+    def __init__(self, penalty='l2', loss='squared_hinge', dual=None, tol=1e-4,
                  C=1.0, multi_class='ovr', fit_intercept=True,
                  intercept_scaling=1, class_weight=None, verbose=0,
                  random_state=None, max_iter=1000):
+
+        # FIXME Set default dual='auto' and remove this for 0.20
+        if dual is None:
+            dual = True
+            warnings.warn("The default dual=True is deprecated and will be removed in 0.20",
+                          DeprecationWarning)
+
         self.dual = dual
         self.tol = tol
         self.C = C
@@ -231,9 +238,18 @@ class LinearSVC(BaseEstimator, LinearClassifierMixin,
         check_classification_targets(y)
         self.classes_ = np.unique(y)
 
+        if self.dual == 'auto':
+            if penalty == 'l2' and loss == 'hinge':
+                dual = True
+            elif penalty == 'l1' and loss == 'squared_hinge':
+                dual = False
+            else:
+                n_samples, n_features = X.shape
+                dual = (n_samples <= n_features)
+
         self.coef_, self.intercept_, self.n_iter_ = _fit_liblinear(
             X, y, self.C, self.fit_intercept, self.intercept_scaling,
-            self.class_weight, self.penalty, self.dual, self.verbose,
+            self.class_weight, self.penalty, dual, self.verbose,
             self.max_iter, self.tol, self.random_state, self.multi_class,
             self.loss, sample_weight=sample_weight)
 
