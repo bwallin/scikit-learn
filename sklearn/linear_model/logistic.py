@@ -1168,10 +1168,10 @@ class LogisticRegression(BaseEstimator, LinearClassifierMixin,
                  random_state=None, solver='liblinear', max_iter=100,
                  multi_class='ovr', verbose=0, warm_start=False, n_jobs=1):
 
-        # FIXME Set default dual='auto' and remove this for 0.20
+        # FIXME Set default dual='auto' and remove this for 0.22
         if dual is None:
             dual = False
-            warnings.warn("The default dual=False is deprecated and will be removed in 0.20",
+            warnings.warn("The default dual=False is deprecated and will be removed in 0.22",
                           DeprecationWarning)
 
         self.penalty = penalty

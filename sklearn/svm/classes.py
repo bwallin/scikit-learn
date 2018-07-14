@@ -176,10 +176,10 @@ class LinearSVC(BaseEstimator, LinearClassifierMixin,
                  intercept_scaling=1, class_weight=None, verbose=0,
                  random_state=None, max_iter=1000):
 
-        # FIXME Set default dual='auto' and remove this for 0.20
+        # FIXME Set default dual='auto' and remove this for 0.22
         if dual is None:
             dual = True
-            warnings.warn("The default dual=True is deprecated and will be removed in 0.20",
+            warnings.warn("The default dual=True is deprecated and will be removed in 0.22",
                           DeprecationWarning)
 
         self.dual = dual
