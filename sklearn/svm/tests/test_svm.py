@@ -549,7 +549,7 @@ def test_linearsvc_parameters():
     # Test possible parameter combinations in LinearSVC
     # Generate list of possible parameter combinations
     losses = ['hinge', 'squared_hinge', 'logistic_regression', 'foo']
-    penalties, duals = ['l1', 'l2', 'bar'], [True, False]
+    penalties, duals = ['l1', 'l2', 'bar'], ['auto', True, False]
 
     X, y = make_classification(n_samples=5, n_features=5)
 
@@ -571,6 +571,33 @@ def test_linearsvc_parameters():
     # Incorrect loss value - test if explicit error message is raised
     assert_raises_regexp(ValueError, ".*loss='l3' is not supported.*",
                          svm.LinearSVC(loss="l3").fit, X, y)
+
+
+def test_linearsvc_dual_auto():
+    losses = ['hinge', 'squared_hinge', 'logistic_regression']
+    penalties = ['l1', 'l2']
+    cases = {
+        'n < m': make_classification(n_samples=5, n_features=10),
+        'n > m': make_classification(n_samples=10, n_features=5)
+    }
+
+    for loss, penalty in itertools.product(losses, penalties):
+        model = svm.LinearSVC(loss=loss, penalty=penalty, dual='auto')
+        for case, (X, y) in cases.items():
+            try:
+                model.fit(X, y)
+            except ValueError:
+                continue
+
+            if (loss, penalty) == ('hinge', 'l2'):
+                assert model.dual_ == True
+            elif (loss, penalty) == ('squared_hinge', 'l1'):
+                assert model.dual_ == False
+            else:
+                if case == 'n < m':
+                    assert model.dual_ == True
+                if case == 'n > m':
+                    assert model.dual_ == False
 
 
 # FIXME remove in 0.22

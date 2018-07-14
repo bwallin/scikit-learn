@@ -238,19 +238,20 @@ class LinearSVC(BaseEstimator, LinearClassifierMixin,
         check_classification_targets(y)
         self.classes_ = np.unique(y)
 
-        dual = self.dual
-        if dual == 'auto':
-            if penalty == 'l2' and loss == 'hinge':
-                dual = True
-            elif penalty == 'l1' and loss == 'squared_hinge':
-                dual = False
+        if self.dual == 'auto':
+            if self.loss == 'hinge' and self.penalty == 'l2':
+                self.dual_ = True
+            elif self.loss == 'squared_hinge' and self.penalty == 'l1':
+                self.dual_ = False
             else:
                 n_samples, n_features = X.shape
-                dual = (n_samples <= n_features)
+                self.dual_ = (n_samples <= n_features)
+        else:
+            self.dual_ = self.dual
 
         self.coef_, self.intercept_, self.n_iter_ = _fit_liblinear(
             X, y, self.C, self.fit_intercept, self.intercept_scaling,
-            self.class_weight, self.penalty, dual, self.verbose,
+            self.class_weight, self.penalty, self.dual_, self.verbose,
             self.max_iter, self.tol, self.random_state, self.multi_class,
             self.loss, sample_weight=sample_weight)
 
