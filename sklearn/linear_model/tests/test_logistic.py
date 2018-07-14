@@ -1260,3 +1260,10 @@ def test_warm_start_converge_LR():
         lr_ws.fit(X, y)
     lr_ws_loss = log_loss(y, lr_ws.predict_proba(X))
     assert_allclose(lr_no_ws_loss, lr_ws_loss, rtol=1e-5)
+
+
+# FIXME remove in 0.22
+def test_logisticregression_dual_default_deprecation():
+    msg = "The default dual=False is deprecated and will be removed in 0.22"
+
+    assert_warns_message(DeprecationWarning, msg, LogisticRegression())

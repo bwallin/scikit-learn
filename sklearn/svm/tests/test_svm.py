@@ -573,6 +573,13 @@ def test_linearsvc_parameters():
                          svm.LinearSVC(loss="l3").fit, X, y)
 
 
+# FIXME remove in 0.22
+def test_linearsvc_dual_default_deprecation():
+    msg = "The default dual=True is deprecated and will be removed in 0.22"
+
+    assert_warns_message(DeprecationWarning, msg, svm.LinearSVC())
+
+
 # FIXME remove in 1.0
 def test_linearsvx_loss_penalty_deprecations():
     X, y = [[0.0], [1.0]], [0, 1]
